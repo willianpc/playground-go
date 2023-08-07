@@ -1,16 +1,34 @@
 package main
 
 import (
-	"fmt"
-
-	"github.com/willianpc/example/pkg1"
-	"github.com/willianpc/example/pkg2"
+	"io"
+	"net/http"
+	"time"
 )
 
-func main() {
-	res := pkg1.ApiOne()
-	res2 := pkg2.ApiTwo()
+func foo(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
 
-	fmt.Println(res)
-	fmt.Println(res2)
+	// simulate run time
+	time.Sleep(time.Millisecond * 300)
+
+	io.WriteString(w, "Foo!\n")
+}
+
+func bar(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	io.WriteString(w, "Bar!\n")
+}
+
+func main() {
+	http.HandleFunc("/foo", wrap(foo))
+	http.HandleFunc("/bar", wrap(bar))
+	http.ListenAndServe(":9090", nil)
 }
